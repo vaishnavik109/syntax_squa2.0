@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalized Recipe Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Personalized Recipe Generator</h1>
+    <h2>Discover Recipes from Different Cuisines! 🍽️</h2>
+
+    <!-- Input for ingredients -->
+    <input type="text" id="ingredients" placeholder="Enter ingredients, comma-separated">
+
+    <!-- Dropdown for selecting cuisine type -->
+    <select id="cuisine">
+        <option value="">Select Cuisine (Optional)</option>
+        <option value="indian">Indian</option>
+        <option value="italian">Italian</option>
+        <option value="chinese">Chinese</option>
+        <option value="mexican">Mexican</option>
+        <option value="french">French</option>
+        <option value="japanese">Japanese</option>
+        <option value="thai">Thai</option>
+        <option value="mediterranean">Mediterranean</option>
+    </select>
+
+    <button onclick="getRecipes()">Get Recipes</button>
+    <div id="result"></div>
+
+    <script>
+        function getRecipes() {
+            const ingredients = document.getElementById('ingredients').value.split(',');
+            const cuisine = document.getElementById('cuisine').value;
+
+            fetch('/recipes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ingredients: ingredients, cuisine: cuisine }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                let resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = '';
+                if (Array.isArray(data)) {
+                    data.forEach(recipe => {
+                        resultDiv.innerHTML += `<h3>${recipe.name}</h3>`;
+                        resultDiv.innerHTML += `<p><strong>Ingredients:</strong> ${recipe.ingredients}</p>`;
+                        resultDiv.innerHTML += `<p><strong>Instructions:</strong> ${recipe.instructions}</p>`;
+                    });
+                } else {
+                    resultDiv.innerHTML = `<p>${data.message}</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = `<p>An error occurred: ${error.message}</p>`;
+            });
+        }
+    </script>
+</body>
+</html>
